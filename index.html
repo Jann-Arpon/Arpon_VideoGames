@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Game Vault</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; }
+    .search-container { margin-bottom: 20px; text-align: center; }
+    input { padding: 10px; width: 300px; font-size: 16px; border-radius: 5px; border: none; }
+    button { padding: 10px 15px; font-size: 16px; background: #7289da; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .card { background: #1e1e1e; border-radius: 8px; overflow: hidden; padding: 15px; text-align: center; }
+    .card img { width: 100%; height: 160px; object-fit: cover; border-radius: 5px; }
+  </style>
+</head>
+<body>
+
+  <div class="search-container">
+    <h1>🎮 Game Vault</h1>
+    <input type="text" id="searchInput" placeholder="Search for a game..." />
+    <button onclick="searchGames()">Search</button>
+  </div>
+
+  <div id="gameGrid" class="grid">Loading games...</div>
+
+  <script src="config.js"></script>
+  <script>
+    const grid = document.getElementById('gameGrid');
+
+    // Fetch initial trending games on load
+    async function fetchGames(query = '') {
+      grid.innerHTML = 'Loading...';
+      const endpoint = query 
+        ? `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(query)}`
+        : `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&page_size=12`;
+
+      try {
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        displayGames(data.results);
+      } catch (error) {
+        grid.innerHTML = '<p>Error fetching data from RAWG.</p>';
+        console.error(error);
+      }
+    }
+
+    function displayGames(games) {
+      if (!games || games.length === 0) {
+        grid.innerHTML = '<p>No games found.</p>';
+        return;
+      }
+      grid.innerHTML = games.map(game => `
+        <div class="card">
+          <img src="${game.background_image || 'https://via.placeholder.com/250'}" alt="${game.name}" />
+          <h3>${game.name}</h3>
+          <p>⭐ Rating: ${game.rating} / 5</p>
+          <p>Released: ${game.released || 'N/A'}</p>
+        </div>
+      `).join('');
+    }
+
+    function searchGames() {
+      const query = document.getElementById('searchInput').value;
+      fetchGames(query);
+    }
+
+    fetchGames();
+  </script>
+</body>
+</html>
