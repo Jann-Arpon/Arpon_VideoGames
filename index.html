@@ -28,7 +28,6 @@
   <script>
     const grid = document.getElementById('gameGrid');
 
-    // Fetch initial trending games on load
     async function fetchGames(query = '') {
       grid.innerHTML = 'Loading...';
       const endpoint = query 
